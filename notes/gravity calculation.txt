@@ -1,0 +1,11 @@
+direction: C970
+
+routinegravity = c8c9 (DOWNCHAR D C8EB)
+currentcol = C92F-c930 (D C8E1 (-1)) C911-C912
+currentrow = C92D-C92E (D C8D2 (-1)) C913-C914
+downchar = C933-C934 (D C8F2) C917-C918
+definite = c935-c946
+
+se d000 = $65 (101) e d001 $b4 (180) > currentcol = 12 ($0c) / currentrow = 19 ($13)
+
+38esimo (19 row * 2) byte della tabella righe deve essere $06 oppure $d0

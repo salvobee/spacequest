@@ -7,4 +7,4 @@ I've included some notes, spreadsheets and flowcharts (badly designed) that at t
 I've started the development on Windows, so I've setup a small dev enviroment using a plain text editor and a batch script to build and exomize the binary, I've used [ACME](https://github.com/meonwax/acme) as cross assembler.
 
 ## How to Build
-I've included in the repository a copy of the [ACME](https://github.com/meonwax/acme) cross assembler binary for windows and of the [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home) compressor, plus the `build.bat` script that I've used to cross-compile the binary.
+The source code is available in the `src` directory, I've included in the repository a copy of the [ACME](https://github.com/meonwax/acme) cross assembler binary for windows and of the [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home) compressor, plus the `build.bat` script that I've used to cross-compile the binary.
