@@ -5,8 +5,8 @@
 ; caricamento simboli per locazioni di memoria comuni
 ;============================================================
 
-!source "code/setup_symbols.asm"
-!source "code/setup_macros.asm"
+!source "code/setup/symbols.asm"
+!source "code/setup/macros.asm"
 
 
 *=$0801
@@ -19,34 +19,34 @@
 ;============================================================
 ; routine di inizializzazione e setup eseguite all'inizio
 ;============================================================
-!source "code/init_disablerestore.asm"
-!source "code/init_setup.asm"
-!source "code/init_setupirq.asm"
-;!source "code/init_setupstableirq.asm"
-!source "code/init_copycharset.asm"
-!source "code/init_copysprite.asm"
+!source "code/init/disablerestore.asm"
+!source "code/init/setup.asm"
+!source "code/init/setupirq.asm"
+;!source "code/init/setupstableirq.asm"
+!source "code/init/copycharset.asm"
+!source "code/init/copysprite.asm"
 
 ;============================================================
 ; routine di gestione del programma
 ;============================================================
-;!source "code/sub_inputcontrols.asm"
-!source "code/sub_decodemap.asm"
-!source "code/sub_startmenu.asm"
-!source "code/sub_screenhandler.asm"
-!source "code/sub_gameover.asm"
-!source "code/sub_spritehandler.asm"
-!source "code/sub_ui.asm"
+;!source "code/sub/inputcontrols.asm"
+!source "code/sub/decodemap.asm"
+!source "code/sub/startmenu.asm"
+!source "code/sub/screenhandler.asm"
+!source "code/sub/gameover.asm"
+!source "code/sub/spritehandler.asm"
+!source "code/sub/ui.asm"
 
 
 ;============================================================
 ; dati e tabelle
 ;============================================================
 
-;!source "code/data_screenchars.s"
-!source "code/data_screen.asm"
-!source "code/data_spritevars.asm"
-!source "code/data_gamevars.asm"
-!source "code/data_map.asm"
+;!source "code/data/screenchars.s"
+!source "code/data/screen.asm"
+!source "code/data/spritevars.asm"
+!source "code/data/gamevars.asm"
+!source "code/data/map.asm"
 
 ;============================================================
 ; caricamento delle risorse esterne 

@@ -187,8 +187,8 @@ if __name__ == "__main__":
         print("Uso: python reorder_map.py [input.asm] [ui_def.asm] [output.asm]")
         # DEFAULT per test rapido
         in_file = 'code/maps/spaceship.asm'
-        ui_file = 'code/data_ui_charset_def.asm'
-        out_file = 'code/data_map.asm'
+        ui_file = 'code/data/ui_charset_def.asm'
+        out_file = 'code/data/map.asm'
         converti_mappa(in_file, ui_file, out_file)
     else:
         converti_mappa(sys.argv[1], sys.argv[2], sys.argv[3])

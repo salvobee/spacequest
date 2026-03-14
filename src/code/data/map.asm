@@ -1,7 +1,7 @@
 
 ; --- MAPPA CONVERTITA AUTOMATICAMENTE ---
 ; Origine: code/maps/spaceship.asm
-; UI Def: code/data_ui_charset_def.asm
+; UI Def: code/data/ui_charset_def.asm
 
 MAP_LEN = 10
 SCREEN_PTR !byte 0

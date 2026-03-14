@@ -1,8 +1,8 @@
 ; include all hardware registers symbols
-!source "code/setup_symbols_kernal.asm"
-!source "code/setup_symbols_cia.asm"
-!source "code/setup_symbols_vic.asm"
-!source "code/setup_symbols_sid.asm"
+!source "code/setup/symbols_kernal.asm"
+!source "code/setup/symbols_cia.asm"
+!source "code/setup/symbols_vic.asm"
+!source "code/setup/symbols_sid.asm"
 
 ;placeholder for various temp parameters
 PARAM1                  = $03
