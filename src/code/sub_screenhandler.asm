@@ -21,7 +21,19 @@ checkplayerposition
 	lda #0
 	sta VIC_SPRITE_X_EXTEND
 
+	dec LIVES
+	jsr DrawLives
+
+	lda LIVES
+	beq .GameOver
+
 	jsr init_player
+	jmp .SkipRespawn
+
+.GameOver
+	jsr ShowGameOverAndWaitFire
+	; Restart game
+	jmp GameStart
 
 .SkipRespawn
 	jmp check_keyboard

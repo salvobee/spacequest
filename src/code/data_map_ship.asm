@@ -17,7 +17,7 @@ COLR_CHAR_DEF = 11
 COLR_CHAR_MC1 = 14
 COLR_CHAR_MC2 = 6
 
-CHAR_COUNT = 67
+CHAR_COUNT = 79
 TILE_COUNT = 17
 TILE_WID = 4
 TILE_HEI = 4
@@ -29,8 +29,8 @@ MAP_WID_PXLS = 3200
 MAP_HEI_PXLS = 160
 
 ; Data block sizes
-SZ_CHARSET_DATA        = 536 ; ($218)
-SZ_CHARSET_ATTRIB_DATA = 67 ; ($43)
+SZ_CHARSET_DATA        = 632 ; ($278)
+SZ_CHARSET_ATTRIB_DATA = 79 ; ($4F)
 SZ_TILESET_DATA        = 272 ; ($110)
 SZ_MAP_DATA            = 500 ; ($1F4)
 
@@ -85,6 +85,22 @@ charset_data
 !byte $FF,$55,$55,$55,$55,$55,$55,$57,$FF,$55,$55,$57,$5E,$7A,$EA,$AA
 !byte $FD,$7A,$EA,$AA,$AA,$AA,$AA,$AA,$55,$AA,$AA,$AA,$AA,$AA,$AA,$AA
 !byte $AA,$AA,$AA,$AA,$AA,$AA,$AA,$AA
+; --- UI CHARS ---
+; 'L' (index 67)
+!byte $60, $60, $60, $60, $60, $60, $7E, $00
+; '=' (index 68)
+!byte $00, $00, $7E, $00, $7E, $00, $00, $00
+; '0'-'9' (indices 69-78)
+!byte $3C, $66, $6E, $7E, $76, $66, $3C, $00
+!byte $18, $38, $18, $18, $18, $18, $7E, $00
+!byte $3C, $66, $06, $0C, $18, $30, $7E, $00
+!byte $3C, $66, $06, $1C, $06, $66, $3C, $00
+!byte $1C, $3C, $6C, $CC, $FE, $0C, $0C, $00
+!byte $7E, $60, $7C, $06, $06, $66, $3C, $00
+!byte $3C, $66, $60, $7C, $66, $66, $3C, $00
+!byte $7E, $66, $0C, $18, $18, $18, $18, $00
+!byte $3C, $66, $66, $3C, $66, $66, $3C, $00
+!byte $3C, $66, $66, $3E, $06, $66, $3C, $00
 
 ; CHARSET IMAGE ATTRIBUTE DATA
 ADDR_CHARSET_ATTRIB_DATA
@@ -94,6 +110,8 @@ charset_attrib_data
 !byte $0D,$0D,$0D,$0D,$0B,$0B,$FB,$09,$09,$09,$09,$09,$09,$09,$09,$09
 !byte $09,$09,$09,$09,$09,$09,$09,$09,$09,$19,$09,$0B,$0B,$1B,$0B,$0B
 !byte $0B,$09,$0B
+; Attributes for UI chars (White, hires = 1)
+!byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 ; CHARTILESET DATA
 * = ADDR_TILESET_DATA

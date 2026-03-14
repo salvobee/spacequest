@@ -2,7 +2,5 @@
 ;game variables
 ;------------------------------------------------------------
 
-
-         
-          
-
+LIVES                   !byte 0
+GAME_STATUS             !byte 0   ; 0 = Menu/IDLE, 1 = Playing

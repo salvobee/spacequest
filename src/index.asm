@@ -33,7 +33,9 @@
 !source "code/sub_decodemap.asm"
 !source "code/sub_startmenu.asm"
 !source "code/sub_screenhandler.asm"
+!source "code/sub_gameover.asm"
 !source "code/sub_spritehandler.asm"
+!source "code/sub_ui.asm"
 
 
 ;============================================================
@@ -43,6 +45,7 @@
 ;!source "code/data_screenchars.s"
 !source "code/data_screen.asm"
 !source "code/data_spritevars.asm"
+!source "code/data_gamevars.asm"
 ;!source "code/data_map.asm"
 ;!source "code/data_map_debug.asm"
 !source "code/data_map_ship.asm"

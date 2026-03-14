@@ -16,6 +16,8 @@ MENU_BG_COLOR               = 0
 
 !zone ShowStartupMenuAndWaitFire
 ShowStartupMenuAndWaitFire
+          lda #0
+          sta GAME_STATUS
           jsr MenuPrepareVisuals
           jsr MenuDrawStaticTexts
 

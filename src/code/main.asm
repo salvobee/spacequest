@@ -9,6 +9,7 @@
 ;------------------------------------------------------------
 ; Boot sequence
 ;------------------------------------------------------------
+GameStart
 jsr disable_restore      ; disabilita combinazione RESTORE/NMI durante il gioco
 jsr setup_init           ; prepara VIC, memoria, mappe, sprite, stato iniziale
 jsr ShowStartupMenuAndWaitFire ; menu iniziale minimale con attesa FIRE
@@ -19,7 +20,12 @@ lda #0
 sta SCREEN_NR
 jsr init_buildmap
 jsr clearbottom
+lda #5
+sta LIVES
+jsr DrawLives
 jsr resetplayerpos
+lda #1
+sta GAME_STATUS
 
 jsr setup_irq            ; installa handler IRQ raster
 ;setup_irq_nokrnl
@@ -65,9 +71,15 @@ WaitFrame
 ; Qui gira la logica frame-based del player.
 irq
           inc $d020              ; bordo++ per profiling visivo tempo IRQ
+
+          lda GAME_STATUS
+          beq .SkipGameLogic
+
           jsr PlayerControl
           jsr checkplayerposition
           ;jsr play_sid
+
+.SkipGameLogic
           dec $d020              ; bordo-- fine profiling
           dec $d019              ; ack IRQ VIC (legacy path)
           jmp $ea31              ; chaining IRQ standard KERNAL

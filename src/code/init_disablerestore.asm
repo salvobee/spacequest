@@ -14,4 +14,7 @@ patch_02a:
     sec
     rts
 patch_02b:
-    rti
+    sei
+    ldx #$ff
+    txs
+    jmp GameStart
