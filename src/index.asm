@@ -43,7 +43,9 @@
 ;!source "code/data_screenchars.s"
 !source "code/data_screen.asm"
 !source "code/data_spritevars.asm"
-!source "code/data_map.asm"
+;!source "code/data_map.asm"
+;!source "code/data_map_debug.asm"
+!source "code/data_map_ship.asm"
 
 ;============================================================
 ; caricamento delle risorse esterne 
