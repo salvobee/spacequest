@@ -1,48 +1,85 @@
+;============================================================
+; Gestione limiti schermo, debug keyboard e cambio schermata
+;============================================================
+; Questo modulo si occupa di:
+; - respawn del player se cade troppo in basso
+; - scorciatoie tastiera (debug) per cambiare schermata
+; - trigger automatico cambio schermata quando il player
+;   raggiunge i bordi orizzontali
+
+;------------------------------------------------------------
+; checkplayerposition
+;------------------------------------------------------------
+; Se lo sprite del player supera Y=200, lo respawna.
+; Poi processa input tastiera di debug.
 checkplayerposition
 	lda VIC_SPRITE_Y_POS
 	cmp #200
-	bcc exitcheck
-	;lda #0
+	bcc .SkipRespawn
+
+	; reset bit X esteso (riporta in area "normale")
+	lda #0
 	sta VIC_SPRITE_X_EXTEND
+
+	jsr init_player
+
+.SkipRespawn
+	jmp check_keyboard
+
+
+;------------------------------------------------------------
+; init_player
+;------------------------------------------------------------
+; Posizione iniziale del player in coordinate tile (x=5,y=5).
 init_player
-	;init sprite 1 pos
 	lda #5
 	sta PARAM1
 	lda #5
 	sta PARAM2
 	ldx #0
-
 	jsr CalcSpritePosFromCharPos
+	rts
 
-exitcheck
+
+;------------------------------------------------------------
+; check_keyboard (debug)
+;------------------------------------------------------------
+; SPACE: respawn player
+; D:     forza schermata precedente
+; U:     forza schermata successiva
 check_keyboard
-	lda #%11111111  ; CIA#1 Port A set to output 
-	sta CIA1_DDRA             
-	lda #%00000000  ; CIA#1 Port B set to inputt
-	sta CIA1_DDRB             
+	lda #%11111111
+	sta CIA1_DDRA
+	lda #%00000000
+	sta CIA1_DDRB
 
-check_space             
-	lda #%01111111  ; select row 8
-	sta CIA1_PRA 
-	lda CIA1_PRB         ; load column information
-	and #%00010000  ; test 'space' key to exit 
+check_space
+	lda #%01111111
+	sta CIA1_PRA
+	lda CIA1_PRB
+	and #%00010000
 	beq init_player
 
-check_d                 
-	lda #%11111011  ; select row 3
-	sta CIA1_PRA 
-	lda CIA1_PRB         ; load column information
-	and #%00000100  ; test 'd' key  
+check_d
+	lda #%11111011
+	sta CIA1_PRA
+	lda CIA1_PRB
+	and #%00000100
 	beq loadscreen_left
 
 check_u
-	lda #%11110111  ; select row 4
-	sta CIA1_PRA 
-	lda CIA1_PRB         ; load column information
-	and #%01000000  ; test 'u' key 
-	beq loadscreen_right	
-	rts             ; return    
+	lda #%11110111
+	sta CIA1_PRA
+	lda CIA1_PRB
+	and #%01000000
+	beq loadscreen_right
+	rts
 
+
+;------------------------------------------------------------
+; checkscreenscroll
+;------------------------------------------------------------
+; Trigger automatico cambio schermata ai bordi orizzontali.
 checkscreenscroll
 	lda VIC_SPRITE_X_POS
 	cmp #$1E
@@ -50,45 +87,42 @@ checkscreenscroll
 	cmp #$44
 	beq checkxextend_right
 	rts
-	
+
 checkxextend_left
 	lda VIC_SPRITE_X_EXTEND
 	bne loadscreen_left
 	rts
+
 checkxextend_right
 	lda VIC_SPRITE_X_EXTEND
 	bne loadscreen_right
 	rts
-	
+
+
+;------------------------------------------------------------
+; loadscreen_left / loadscreen_right
+;------------------------------------------------------------
+; Cambia indice schermata, ricostruisce mappa e ricolloca player.
 loadscreen_left
 	lda SCREEN_NR
 	cmp #00
 	bne move_leftscreen
 	rts
+
 move_leftscreen
-	;jsr disable_irq
 	ldx SCREEN_NR
 	dex
 	stx SCREEN_NR
-	; txa
-	; asl 
-	; sta SCREEN_PTR
 	jsr init_buildmap
-	;jsr clearbottom
-	;jsr setup_irq
+
 	lda #39
-	sta PARAM1
-	lda SPRITE_CHAR_POS_Y
-	sta PARAM2
-	ldx #0
-		lda VIC_SPRITE_X_EXTEND
-	eor #%00000001
-	sta VIC_SPRITE_X_EXTEND
-	jsr CalcSpritePosFromCharPos	
+	jsr RepositionPlayerOnScreenTransition
 	rts
-	
+
 
 loadscreen_right
+
+; Etichetta legacy usata da routine di bootstrap/debug.
 debug1
 	lda SCREEN_NR
 	cmp #MAP_LEN
@@ -96,28 +130,41 @@ debug1
 	rts
 
 move_rightscreen
-
-	;jsr disable_irq ; $095E
-	 ; $0AEB
-	ldx SCREEN_NR ; $100C
+	ldx SCREEN_NR
 	inx
 	stx SCREEN_NR
-	;txa
-	;asl 
-	;sta SCREEN_PTR ; $100B
-	jsr init_buildmap ; $09C7
-	;jsr clearbottom ; $0A7E
-	; ; jsr $09ab
-	;jsr init_player
+	jsr init_buildmap
+
 	lda #08
+	jsr RepositionPlayerOnScreenTransition
+	rts
+
+
+;------------------------------------------------------------
+; RepositionPlayerOnScreenTransition
+;------------------------------------------------------------
+; Input:
+;   A = nuova tile X del player (ingresso lato opposto)
+; Effetti:
+;   - mantiene la tile Y corrente
+;   - inverte bit estensione X per coerenza VIC
+;   - aggiorna coordinate sprite reali via routine centrale
+RepositionPlayerOnScreenTransition
 	sta PARAM1
 	lda SPRITE_CHAR_POS_Y
 	sta PARAM2
 	ldx #0
+	jsr ToggleSpriteXExtendForPlayer
+	jsr CalcSpritePosFromCharPos
+	rts
+
+
+;------------------------------------------------------------
+; ToggleSpriteXExtendForPlayer
+;------------------------------------------------------------
+; Toggle del bit 0 del registro X-extend sprite.
+ToggleSpriteXExtendForPlayer
 	lda VIC_SPRITE_X_EXTEND
 	eor #%00000001
 	sta VIC_SPRITE_X_EXTEND
-	
-	jsr CalcSpritePosFromCharPos
-	;jsr setup_irq
 	rts

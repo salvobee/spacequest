@@ -8,3 +8,5 @@ I've started the development on Windows, so I've setup a small dev enviroment us
 
 ## How to Build
 The source code is available in the `src` directory, I've included in the repository a copy of the [ACME](https://github.com/meonwax/acme) cross assembler binary for windows and of the [Exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home) compressor, plus the `build.bat` script that I've used to cross-compile the binary.
+## Ripartenza rapida
+Per riprendere il progetto velocemente, trovi una panoramica tecnica in `notes/onboarding.md` con flusso di esecuzione, moduli chiave e piano a micro-step.
