@@ -1,6 +1,16 @@
-;------------------------------------------------------------
-;check joystick (player control)   ; BREAK 0DAC
-;------------------------------------------------------------
+;============================================================
+; Gestione player (input + fisica semplificata + collisioni)
+;============================================================
+; Flusso ad ogni frame:
+; 1) se non sta saltando, prova caduta (gravità)
+; 2) se premuto UP e tasto appena "armato", avvia salto
+; 3) applica eventuale accelerazione di caduta
+; 4) gestisce input orizzontale con collisioni tile-based
+;
+; Convenzioni di ritorno routine movimento:
+; A=1 movimento eseguito
+; A=0 movimento bloccato da collisione
+;============================================================
 !zone PlayerControl
 PlayerControl ; $0b2f
 
@@ -521,64 +531,52 @@ MoveSpriteDown
 
 
 ;------------------------------------------------------------
+; IsTileBlockingByAttributes
+;------------------------------------------------------------
+; Input:
+;   A = indice carattere nella charset/tilemap
+; Output:
+;   A = 1 se il tile è bloccante, 0 altrimenti
+;
+; Regola attuale: nibble alto attributi == $F0 => bloccante.
+; Questa routine centralizza la logica per evitare duplicazioni
+; fra collisioni orizzontali e verticali.
+;------------------------------------------------------------
+!zone IsTileBlockingByAttributes
+IsTileBlockingByAttributes
+          stx $fe
+          tax
+          lda ADDR_CHARSET_ATTRIB_DATA,x
+          and #$f0
+          cmp #$F0
+          beq .Blocking
+
+          lda #0
+          ldx $fe
+          rts
+
+.Blocking
+          lda #1
+          ldx $fe
+          rts
+
+;------------------------------------------------------------
 ;IsCharBlocking
-;checks if a char is blocking
-;PARAM1 = char_pos_x
-;PARAM2 = char_pos_y
-;returns 1 for blocking, 0 for not blocking
+;Wrapper semantico per collisioni generiche
 ;------------------------------------------------------------
 !zone IsCharBlocking
 IsCharBlocking
-          ; cmp #128
-		  ; bpl .Blocking
-		  
-		  stx $fe
-		  tax
-		  lda ADDR_CHARSET_ATTRIB_DATA,x		; 0f78,04
-		  and #$f0
-		  cmp #$F0
-		  beq .Blocking
-		  
-          
-          
-          lda #0
-		  ldx $fe
-          rts
-          
-.Blocking
-          lda #1
-		  ldx $fe
-          rts
+          jmp IsTileBlockingByAttributes
 
 
 ;------------------------------------------------------------
 ;IsCharBlockingFall
-;checks if a char is blocking a fall (downwards)
-;PARAM1 = char_pos_x
-;PARAM2 = char_pos_y
-;returns 1 for blocking, 0 for not blocking
+;Wrapper semantico per collisioni in caduta.
+; Al momento usa la stessa regola di IsCharBlocking.
 ;------------------------------------------------------------
 !zone IsCharBlockingFall ; 0da6
 IsCharBlockingFall
-          ; cmp #9
-		  ; beq .Blocking          
-		  	
-		  stx $fe
-		  tax
-		  lda ADDR_CHARSET_ATTRIB_DATA,x
-		  and #$f0
-		  cmp #$F0
-		  beq .Blocking
-		  
-          
-          lda #0
-		  ldx $fe
-          rts
-          
-.Blocking
-          lda #1
-		  ldx $fe
-          rts
+          jmp IsTileBlockingByAttributes
 
 
 ;------------------------------------------------------------
@@ -694,4 +692,3 @@ pl1ResetFrameCount
 		sta PLY1_ANMT_CURFRAME
 		rts
 		
-

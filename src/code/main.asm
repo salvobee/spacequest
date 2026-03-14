@@ -1,68 +1,85 @@
+;============================================================
+; Main runtime loop + IRQ
+;============================================================
+; Questo file contiene il flusso principale del gioco:
+; 1) setup iniziale
+; 2) loop cooperativo (fallback)
+; 3) IRQ raster (loop reale frame-based)
 
-; Codice principale eseguito all'avvio del programma
-
-; BNE branch se diverso da zero o da operando di confronto
-; BEQ branch se uguale a zero o diverso
-
-jsr disable_restore
-jsr setup_init
-jsr setup_irq
+;------------------------------------------------------------
+; Boot sequence
+;------------------------------------------------------------
+jsr disable_restore      ; disabilita combinazione RESTORE/NMI durante il gioco
+jsr setup_init           ; prepara VIC, memoria, mappe, sprite, stato iniziale
+jsr setup_irq            ; installa handler IRQ raster
 ;setup_irq_nokrnl
 ;jsr init_sid
-jmp *
+jmp *                    ; dopo setup_irq il controllo passa agli interrupt
 
 
-
-GameLoop  
+;------------------------------------------------------------
+; GameLoop (fallback/manuale)
+;------------------------------------------------------------
+; In pratica, con IRQ attivo, la logica gira dentro "irq".
+; Questo loop resta utile per debug o setup alternativi.
+GameLoop
           jsr WaitFrame
           jsr PlayerControl
           jmp GameLoop
 
 
+;------------------------------------------------------------
+; WaitFrame
+;------------------------------------------------------------
+; Sincronizza l'esecuzione alla raster line $F8.
+; Strategia a due fasi:
+; - prima aspetta di NON essere già su $F8,
+; - poi aspetta il prossimo arrivo su $F8.
+; In questo modo evitiamo doppio trigger nello stesso frame.
 !zone WaitFrame
-          ;wait for the raster to reach line $f8
-          ;this is keeping our timing stable
-          
-          ;are we on line $F8 already? if so, wait for the next full screen
-          ;prevents mistimings if called too fast
-WaitFrame 
+WaitFrame
           lda $d012
           cmp #$F8
           beq WaitFrame
 
-          ;wait for the raster to reach line $f8 (should be closer to the start of this line this way)
-.WaitStep2
+.WaitUntilRasterF8
           lda $d012
           cmp #$F8
-          bne .WaitStep2
-          
+          bne .WaitUntilRasterF8
           rts
-		  
-irq 
-	inc $d020
-	 jsr PlayerControl ; $0aa1
-	 jsr checkplayerposition ; $0a51
-	 ;jsr play_sid
-	 dec $d020
-	 dec $d019
-	 jmp $ea31  
 
+
+;------------------------------------------------------------
+; IRQ raster con ritorno al kernel
+;------------------------------------------------------------
+; Qui gira la logica frame-based del player.
+irq
+          inc $d020              ; bordo++ per profiling visivo tempo IRQ
+          jsr PlayerControl
+          jsr checkplayerposition
+          ;jsr play_sid
+          dec $d020              ; bordo-- fine profiling
+          dec $d019              ; ack IRQ VIC (legacy path)
+          jmp $ea31              ; chaining IRQ standard KERNAL
+
+
+;------------------------------------------------------------
+; IRQ raster standalone (senza kernel chain)
+;------------------------------------------------------------
 irq_nokrnl
-		STA $fe
-        LDA $DC0D
-        STX $fc
-        STY $fd
-		inc $d020
-		 jsr PlayerControl ; 0ad9
-		 LDA #$01
-        STA $D019
-        LDY $fd
-        LDX $fc
-        LDA $fe
-		dec $d020
-        RTI
-		 ;jsr play_sid
-		 
-		 ; dec $d019
-		 ; jmp $ea31  
+          sta $fe                ; salva A
+          lda $dc0d              ; ack CIA interrupt source
+          stx $fc                ; salva X
+          sty $fd                ; salva Y
 
+          inc $d020
+          jsr PlayerControl
+
+          lda #$01
+          sta $D019              ; ack IRQ raster VIC esplicito
+
+          ldy $fd                ; ripristina Y
+          ldx $fc                ; ripristina X
+          lda $fe                ; ripristina A
+          dec $d020
+          rti
