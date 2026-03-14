@@ -80,21 +80,26 @@ check_u
 ; checkscreenscroll
 ;------------------------------------------------------------
 ; Trigger automatico cambio schermata ai bordi orizzontali.
+; Thresholds:
+;   Left:  X <= $18 (24) AND X_EXTEND bit 0 == 0
+;   Right: X >= $58 (88) AND X_EXTEND bit 0 == 1 ($58 + 256 = 344)
 checkscreenscroll
 	lda VIC_SPRITE_X_POS
-	cmp #$1E
-	beq checkxextend_left
-	cmp #$44
-	beq checkxextend_right
+	cmp #$18
+	bcc .maybe_left
+	cmp #$58
+	bcs .maybe_right
 	rts
 
-checkxextend_left
+.maybe_left
 	lda VIC_SPRITE_X_EXTEND
-	bne loadscreen_left
+	and #%00000001
+	beq loadscreen_left
 	rts
 
-checkxextend_right
+.maybe_right
 	lda VIC_SPRITE_X_EXTEND
+	and #%00000001
 	bne loadscreen_right
 	rts
 
@@ -105,38 +110,30 @@ checkxextend_right
 ; Cambia indice schermata, ricostruisce mappa e ricolloca player.
 loadscreen_left
 	lda SCREEN_NR
-	cmp #00
-	bne move_leftscreen
-	rts
-
-move_leftscreen
-	ldx SCREEN_NR
-	dex
-	stx SCREEN_NR
+	beq .skip_left
+	
+	dec SCREEN_NR
 	jsr init_buildmap
 
-	lda #39
+	lda #38
 	jsr RepositionPlayerOnScreenTransition
+.skip_left
 	rts
 
-
-loadscreen_right
 
 ; Etichetta legacy usata da routine di bootstrap/debug.
 debug1
+loadscreen_right
 	lda SCREEN_NR
-	cmp #MAP_LEN
-	bne move_rightscreen
-	rts
-
-move_rightscreen
-	ldx SCREEN_NR
-	inx
-	stx SCREEN_NR
+	cmp #(MAP_LEN - 1)
+	beq .skip_right
+	
+	inc SCREEN_NR
 	jsr init_buildmap
 
-	lda #08
+	lda #1
 	jsr RepositionPlayerOnScreenTransition
+.skip_right
 	rts
 
 
