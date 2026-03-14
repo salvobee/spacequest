@@ -38,6 +38,19 @@ ShowStartupMenuAndWaitFire
           bit $dc00
           beq .WaitFireRelease
 
+          ; chirurgicamente ripristiniamo lo stato per il gioco
+          ; riattiviamo multicolor mode
+          lda VIC_CONTROL
+          ora #$10
+          sta VIC_CONTROL
+
+          ; ricarichiamo il charset della mappa (che era stato sovrascritto dal ROM charset)
+          lda #<ADDR_CHARSET_DATA
+          sta ZEROPAGE_POINTER_1
+          lda #>ADDR_CHARSET_DATA
+          sta ZEROPAGE_POINTER_1+1
+          jsr CopyCharSet
+
           rts
 
 
@@ -48,6 +61,40 @@ MenuPrepareVisuals
           ; nasconde sprite durante menu
           lda #0
           sta VIC_SPRITE_ENABLE
+
+          ; disabilita multicolor mode per il menu (modalità testuale)
+          lda VIC_CONTROL
+          and #%11101111
+          sta VIC_CONTROL
+
+          ; copia ROM charset in RAM ($F000) per avere i caratteri standard
+          sei
+          lda $01
+          pha
+          lda #$33              ; scopre il Char ROM all'indirizzo $D000 per la CPU
+          sta $01
+
+          ldx #8                ; 8 pagine = 2KB
+          lda #$D0
+          sta ZEROPAGE_POINTER_1+1
+          lda #$F0
+          sta ZEROPAGE_POINTER_2+1
+          ldy #0
+          sty ZEROPAGE_POINTER_1
+          sty ZEROPAGE_POINTER_2
+.CopyRomLoop
+          lda (ZEROPAGE_POINTER_1),y
+          sta (ZEROPAGE_POINTER_2),y
+          iny
+          bne .CopyRomLoop
+          inc ZEROPAGE_POINTER_1+1
+          inc ZEROPAGE_POINTER_2+1
+          dex
+          bne .CopyRomLoop
+
+          pla
+          sta $01
+          cli
 
           ; sfondo nero
           lda #MENU_BG_COLOR
@@ -84,27 +131,27 @@ MenuPrepareVisuals
 ; Disegno testi statici menu
 ;------------------------------------------------------------
 MenuDrawStaticTexts
-          ; Titolo centrato circa: riga 8, colonna 15
+          ; Titolo centrato: riga 11, colonna 15
           lda #<MENU_TITLE_TEXT
           sta ZEROPAGE_POINTER_1
           lda #>MENU_TITLE_TEXT
           sta ZEROPAGE_POINTER_1+1
           lda #15
           sta PARAM1
-          lda #8
+          lda #11
           sta PARAM2
           lda #MENU_TITLE_TEXT_LEN
           sta PARAM3
           jsr MenuWriteTextAt
 
-          ; Prompt centrato circa: riga 14, colonna 10
+          ; Prompt centrato: riga 13, colonna 10
           lda #<MENU_START_TEXT
           sta ZEROPAGE_POINTER_1
           lda #>MENU_START_TEXT
           sta ZEROPAGE_POINTER_1+1
           lda #10
           sta PARAM1
-          lda #14
+          lda #13
           sta PARAM2
           lda #MENU_START_TEXT_LEN
           sta PARAM3
@@ -169,12 +216,14 @@ MenuWriteTextAt
 
 
 ;------------------------------------------------------------
-; Dati testo menu (screen code)
+; Dati testo menu (valori in Screen Code per evitare simboli PETSCII)
 ;------------------------------------------------------------
+; 19=S, 16=P, 1=A, 3=C, 5=E, 17=Q, 21=U, 5=E, 19=S, 20=T
 MENU_TITLE_TEXT
-          !scr "SPACEQUEST"
+          !byte 19, 16, 1, 3, 5, 17, 21, 5, 19, 20
 MENU_TITLE_TEXT_LEN = 10
 
+; 16=P, 18=R, 5=E, 19=S, 19=S, 32=Space, 6=F, 9=I, 18=R, 5=E, 32, 20=T, 15=O, 32, 19=S, 20=T, 1=A, 18=R, 20=T
 MENU_START_TEXT
-          !scr "PRESS FIRE TO START"
+          !byte 16, 18, 5, 19, 19, 32, 6, 9, 18, 5, 32, 20, 15, 32, 19, 20, 1, 18, 20
 MENU_START_TEXT_LEN = 19
