@@ -31,6 +31,7 @@
 ;============================================================
 ;!source "code/sub_inputcontrols.asm"
 !source "code/sub_decodemap.asm"
+!source "code/sub_startmenu.asm"
 !source "code/sub_screenhandler.asm"
 !source "code/sub_spritehandler.asm"
 

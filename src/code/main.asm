@@ -11,6 +11,16 @@
 ;------------------------------------------------------------
 jsr disable_restore      ; disabilita combinazione RESTORE/NMI durante il gioco
 jsr setup_init           ; prepara VIC, memoria, mappe, sprite, stato iniziale
+jsr ShowStartupMenuAndWaitFire ; menu iniziale minimale con attesa FIRE
+
+; Dopo il menu ripristiniamo esplicitamente lo stato gameplay.
+; (Il menu nasconde sprite e pulisce lo schermo.)
+lda #0
+sta SCREEN_NR
+jsr init_buildmap
+jsr clearbottom
+jsr resetplayerpos
+
 jsr setup_irq            ; installa handler IRQ raster
 ;setup_irq_nokrnl
 ;jsr init_sid
